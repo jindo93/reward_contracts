@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.2;
 
 import "./SafeMath.sol";
 
@@ -17,7 +17,7 @@ contract AddAndReward {
     //                  and use it on the front-end to restrict access
     //custum objects
     struct Rewardee {
-        address addr;
+        address payable addr;
         uint rewarded_amount;
         bool registered;
         bool rewarded;
@@ -58,7 +58,6 @@ contract AddAndReward {
     event ProgramManagerChanged(uint _progId, address _from, address _to);
     event ProgramRewarderChanged(uint _progId, address _from, address _to);
     event ProgramCreated(uint _progId, string _progName, uint _end_time); 
-    // Not sure whether end_time should be bytes or uint
     event RewardeeRegistered(uint _progId, uint _rwdId, uint _rewardeeCount);
     event RewardeeRewarded(uint _progId, uint _rwdId, address _rewardee, uint _amount);
     event DepositerRegistered(uint _progId, address _depositer);
@@ -89,7 +88,7 @@ contract AddAndReward {
         address(this).transfer(msg.value);
     }
     
-    function () public payable {
+    function () external payable {
         require(msg.value > 0);
         mgmt_deposit[msg.sender] = msg.value;
         address(this).transfer(msg.value);
@@ -97,7 +96,7 @@ contract AddAndReward {
     }
 
     
-    function createProgram(string _name, uint _days_left) public {
+    function createProgram(string memory _name, uint _days_left) public {
         uint i = progCount;
         programs[i].progName = _name;
         programs[i].progOwner = msg.sender;
@@ -181,7 +180,6 @@ contract AddAndReward {
     
     function addRewardee(uint _progId, address _addr) public returns(bool) {
         uint i = _progId;
-        uint rwd_info;
         uint j = programs[i].rewardeeCount;
         programs[i].rwd_info[_addr].rwdId = j;
         uint k = programs[i].rwd_info[_addr].rwdId;
@@ -261,15 +259,9 @@ contract AddAndReward {
         programs[i].progManager = address(0);
         emit LockedProgram(i, now);
     }
-    
-    function reward(uint _progId) private {
-        uint i = programs[_progId].rewardeeCount;
-        
-        
-    }
       
     ////////////////COMPUTATIONALLY EXPENSIVE FUNCTIONS//////////////////
-    function contains(address[] _list, address _addr) private pure returns(bool) {
+    function contains(address[] memory _list, address _addr) private pure returns(bool) {
         uint j = _list.length;
         for(uint i = 0; i < j;  i++) {
             if(_list[i]==_addr) { 

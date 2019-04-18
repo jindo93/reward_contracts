@@ -1,4 +1,4 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.2;
 
 import "./SafeMath.sol";
 
@@ -8,6 +8,7 @@ contract AddCandidateThenReward {
     uint private total_rewarded;
     mapping(address => uint) private reward_balance;
     
+    address payable public this;
     address public _owner;
     address public _rewarder;
     address public _manager;
@@ -43,7 +44,7 @@ contract AddCandidateThenReward {
     }
     
 
-    function RewardeeList() public view returns(address[]) {
+    function RewardeeList() public view returns(address[] memory) {
         return rewardee_list;
     }
     
@@ -51,7 +52,7 @@ contract AddCandidateThenReward {
         return rewardee_list.length;
     }
     
-    function RewardedList() public view returns(address[]) {
+    function RewardedList() public view returns(address[] memory) {
         return rewarded_list;
     }
     
@@ -65,14 +66,14 @@ contract AddCandidateThenReward {
     }
     
     function addRewardee(address _addr) public onlyOwner returns(uint) {
-        require(_addr != 0);
+        require(_addr != address(0));
         rewardee_list.push(_addr);
         reward_balance[_addr] = 0;
         emit RewardeeAdded(_addr, rewardee_list.length);
         return rewardee_list.length;
     }
     
-    function contains(address[] _list, address _addr) private pure returns(bool) {
+    function contains(address[] memory _list, address _addr) private pure returns(bool) {
         uint j = _list.length;
         for(uint i=0; i<j;  i++) {
             if(_list[i]==_addr) { 
@@ -82,7 +83,7 @@ contract AddCandidateThenReward {
         return false;
     }
 
-    function rewardCandidate(address rewardee, uint amount) public onlyRewarder returns(uint) {
+    function rewardCandidate(address payable rewardee, uint amount) public onlyRewarder returns(uint) {
         require(amount > 0);
         require(address(this).balance >= amount);
         require(contains(rewardee_list, rewardee) == true); //checks if the given address is contained in the contract
